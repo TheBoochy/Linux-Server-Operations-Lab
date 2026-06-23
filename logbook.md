@@ -297,3 +297,76 @@ Screenshots:
 ![screenshot-06-linux-users-and-groups-created.png](screenshots/screenshot-06-linux-users-and-groups-created.png)
 
 ![screenshot-07-sudo-access-test.png](screenshots/screenshot-07-sudo-access-test.png)
+
+---
+
+## 2026-06-23 — Part 5: Firewall and basic hardening
+
+### Goal
+
+Verify the Linux firewall configuration and review listening network services for basic hardening.
+
+### Work completed
+
+* Checked the firewalld service status.
+* Verified that firewalld is active and running.
+* Confirmed that firewalld is enabled at boot.
+* Checked the current firewall state.
+* Listed the active firewall zone configuration.
+* Verified that SSH is allowed through the firewall.
+* Reviewed listening TCP and UDP services.
+* Confirmed that SSH is the only externally listening remote administration service.
+* Confirmed that chronyd is only listening locally for time synchronization.
+* Verified that Cockpit is allowed in the firewall but not actively listening on port 9090.
+
+### Verification results
+
+| Item                             | Result                                            |
+| -------------------------------- | ------------------------------------------------- |
+| Firewall service                 | firewalld                                         |
+| Firewall status                  | active running                                    |
+| Firewall boot state              | enabled                                           |
+| Firewall state                   | running                                           |
+| Active zone                      | public                                            |
+| Active interface                 | ens160                                            |
+| Allowed services                 | cockpit, dhcpv6-client, ssh                       |
+| Externally listening TCP service | sshd on port 22                                   |
+| Local UDP service                | chronyd on port 323                               |
+| Cockpit listening on port 9090   | No                                                |
+| Hardening result                 | No unexpected externally listening services found |
+
+### Commands used
+
+```bash
+sudo systemctl status firewalld
+sudo firewall-cmd --state
+sudo firewall-cmd --list-all
+sudo ss -tulpn
+```
+
+### Command purpose
+
+| Command                         | Purpose                                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| sudo systemctl status firewalld | Checks whether the firewall service is running and enabled.                                                      |
+| sudo firewall-cmd --state       | Shows whether firewalld is currently running.                                                                    |
+| sudo firewall-cmd --list-all    | Lists the active firewall zone, interface and allowed services.                                                  |
+| sudo ss -tulpn                  | Shows TCP and UDP services that are listening for network connections, including process names and port numbers. |
+
+### Notes
+
+The firewall is active and allows SSH, which is required for remote administration.
+
+The firewall also lists Cockpit as an allowed service, but the listening services check did not show Cockpit listening on port 9090. This means Cockpit was allowed by the firewall but was not actively exposed as a running web administration service.
+
+The listening services check showed sshd listening on port 22 and chronyd listening locally on port 323. No unexpected externally listening services were found.
+
+This part demonstrates basic Linux firewall review and service exposure checking.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-08-firewall-status.png](screenshots/screenshot-08-firewall-status.png)
+
+![screenshot-09-listening-services-check.png](screenshots/screenshot-09-listening-services-check.png)
