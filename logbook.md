@@ -370,3 +370,115 @@ Screenshots:
 ![screenshot-08-firewall-status.png](screenshots/screenshot-08-firewall-status.png)
 
 ![screenshot-09-listening-services-check.png](screenshots/screenshot-09-listening-services-check.png)
+
+---
+
+## 2026-06-23 — Part 6: Systemd service management
+
+### Goal
+
+Create and verify a custom systemd service that runs a Linux script and writes a heartbeat message to a log file.
+
+### Work completed
+
+* Attempted to use nano to create the script file.
+* Confirmed nano was not installed on the RHEL Minimal Install system.
+* Attempted to install nano with dnf.
+* Confirmed that the RHEL system was not registered and had no enabled repositories.
+* Created the heartbeat script using tee instead of nano.
+* Created the script at /usr/local/bin/linuxops-heartbeat.sh.
+* Made the script executable.
+* Verified the script permissions.
+* Created the custom systemd service file at /etc/systemd/system/linuxops-heartbeat.service.
+* Reloaded systemd daemon configuration.
+* Started the custom systemd service.
+* Verified the service status.
+* Confirmed that the oneshot service completed successfully.
+* Verified that the heartbeat log file was created and updated.
+* Enabled the custom service for the multi-user target.
+
+### Verification results
+
+| Item                 | Result                                         |
+| -------------------- | ---------------------------------------------- |
+| Script path          | /usr/local/bin/linuxops-heartbeat.sh           |
+| Script permission    | executable                                     |
+| Script owner         | root                                           |
+| Service name         | linuxops-heartbeat.service                     |
+| Service file path    | /etc/systemd/system/linuxops-heartbeat.service |
+| Service type         | oneshot                                        |
+| Service enabled      | Yes                                            |
+| Service active state | inactive dead after successful run             |
+| Service result       | Deactivated successfully                       |
+| Log file             | /var/log/linuxops-heartbeat.log                |
+| Log result           | Heartbeat entry written successfully           |
+
+### Commands used
+
+```bash
+sudo nano /usr/local/bin/linuxops-heartbeat.sh
+sudo dnf install -y nano
+sudo tee /usr/local/bin/linuxops-heartbeat.sh > /dev/null <<'EOF'
+#!/bin/bash
+echo "$(date) linuxops heartbeat service ran on $(hostname)" >> /var/log/linuxops-heartbeat.log
+EOF
+sudo chmod +x /usr/local/bin/linuxops-heartbeat.sh
+ls -l /usr/local/bin/linuxops-heartbeat.sh
+sudo /usr/local/bin/linuxops-heartbeat.sh
+sudo cat /var/log/linuxops-heartbeat.log
+sudo tee /etc/systemd/system/linuxops-heartbeat.service > /dev/null <<'EOF'
+[Unit]
+Description=LinuxOps Heartbeat Service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/linuxops-heartbeat.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl start linuxops-heartbeat.service
+sudo systemctl status linuxops-heartbeat.service --no-pager
+sudo cat /var/log/linuxops-heartbeat.log
+sudo systemctl enable linuxops-heartbeat.service
+sudo cat /usr/local/bin/linuxops-heartbeat.sh
+sudo cat /etc/systemd/system/linuxops-heartbeat.service
+```
+
+### Command purpose
+
+| Command                                                     | Purpose                                                               |
+| ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| sudo nano /usr/local/bin/linuxops-heartbeat.sh              | Attempts to open nano to create the heartbeat script.                 |
+| sudo dnf install -y nano                                    | Attempts to install nano using the RHEL package manager.              |
+| sudo tee /usr/local/bin/linuxops-heartbeat.sh               | Creates the heartbeat script without using a text editor.             |
+| sudo chmod +x /usr/local/bin/linuxops-heartbeat.sh          | Makes the script executable.                                          |
+| ls -l /usr/local/bin/linuxops-heartbeat.sh                  | Shows the script file permissions, owner and path.                    |
+| sudo /usr/local/bin/linuxops-heartbeat.sh                   | Runs the script manually for testing.                                 |
+| sudo cat /var/log/linuxops-heartbeat.log                    | Displays the heartbeat log file.                                      |
+| sudo tee /etc/systemd/system/linuxops-heartbeat.service     | Creates the custom systemd service file.                              |
+| sudo systemctl daemon-reload                                | Reloads systemd so it detects the new service file.                   |
+| sudo systemctl start linuxops-heartbeat.service             | Starts the custom service once.                                       |
+| sudo systemctl status linuxops-heartbeat.service --no-pager | Shows the service status without opening a pager view.                |
+| sudo systemctl enable linuxops-heartbeat.service            | Enables the service for the multi-user target.                        |
+| sudo cat /usr/local/bin/linuxops-heartbeat.sh               | Displays the script content for documentation evidence.               |
+| sudo cat /etc/systemd/system/linuxops-heartbeat.service     | Displays the systemd service file content for documentation evidence. |
+
+### Notes
+
+The RHEL Minimal Install system did not include nano by default. Installing nano with dnf failed because the system was not registered with Red Hat subscription management and had no enabled package repositories.
+
+Instead of using nano, the script and systemd service file were created with tee and here-document syntax. This is useful in minimal server environments where a text editor or package repositories may not be available.
+
+The service uses Type=oneshot, which means it runs once and then exits. Because of this, inactive dead is normal after the service finishes, as long as the service completed successfully and the log file was updated.
+
+This part demonstrates custom script creation, systemd unit file creation, service management and log verification.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-10-custom-systemd-service-created.png](screenshots/screenshot-10-custom-systemd-service-created.png)
+
+![screenshot-11-systemd-service-status.png](screenshots/screenshot-11-systemd-service-status.png)
