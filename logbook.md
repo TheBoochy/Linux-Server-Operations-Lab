@@ -197,3 +197,103 @@ Screenshots:
 ![screenshot-04-ssh-service-running.png](screenshots/screenshot-04-ssh-service-running.png)
 
 ![screenshot-05-ssh-login-success.png](screenshots/screenshot-05-ssh-login-success.png)
+
+---
+
+## 2026-06-23 — Part 4: Users, groups and sudo access
+
+### Goal
+
+Create Linux users and groups, assign group membership and verify sudo access behavior.
+
+### Work completed
+
+* Created the linuxops group.
+* Created the backupops group.
+* Created the opsadmin user.
+* Created the backupuser user.
+* Created the readonlyuser user.
+* Set passwords for the created users.
+* Added opsadmin to the linuxops group.
+* Added backupuser to the backupops group.
+* Added opsadmin to the wheel group for sudo access.
+* Verified user and group membership.
+* Tested sudo access for opsadmin.
+* Verified that readonlyuser does not have sudo access.
+
+### Verification results
+
+| Item                          | Result                    |
+| ----------------------------- | ------------------------- |
+| Operations group              | linuxops                  |
+| Backup group                  | backupops                 |
+| Admin test user               | opsadmin                  |
+| Backup test user              | backupuser                |
+| Limited test user             | readonlyuser              |
+| opsadmin group membership     | opsadmin, wheel, linuxops |
+| backupuser group membership   | backupuser, backupops     |
+| readonlyuser group membership | readonlyuser only         |
+| opsadmin sudo test            | Successful                |
+| readonlyuser sudo test        | Denied as expected        |
+
+### Commands used
+
+```bash
+sudo groupadd linuxops
+sudo groupadd backupops
+sudo useradd -m -s /bin/bash opsadmin
+sudo useradd -m -s /bin/bash backupuser
+sudo useradd -m -s /bin/bash readonlyuser
+sudo passwd opsadmin
+sudo passwd backupuser
+sudo passwd readonlyuser
+sudo usermod -aG linuxops opsadmin
+sudo usermod -aG backupops backupuser
+sudo usermod -aG wheel opsadmin
+id opsadmin
+id backupuser
+id readonlyuser
+getent group linuxops
+getent group backupops
+su - opsadmin
+whoami
+sudo whoami
+exit
+su - readonlyuser
+whoami
+sudo whoami
+```
+
+### Command purpose
+
+| Command                                   | Purpose                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| sudo groupadd linuxops                    | Creates the linuxops group.                                             |
+| sudo groupadd backupops                   | Creates the backupops group.                                            |
+| sudo useradd -m -s /bin/bash opsadmin     | Creates opsadmin with a home directory and Bash shell.                  |
+| sudo useradd -m -s /bin/bash backupuser   | Creates backupuser with a home directory and Bash shell.                |
+| sudo useradd -m -s /bin/bash readonlyuser | Creates readonlyuser with a home directory and Bash shell.              |
+| sudo passwd username                      | Sets a password for the selected user.                                  |
+| sudo usermod -aG group user               | Adds an existing user to an additional group.                           |
+| id username                               | Shows user ID and group membership.                                     |
+| getent group groupname                    | Shows information about a specific group.                               |
+| su - username                             | Switches to another user and loads that user environment.               |
+| whoami                                    | Shows the currently active user.                                        |
+| sudo whoami                               | Tests whether the user can run a command with administrator privileges. |
+| exit                                      | Leaves the current user session and returns to the previous session.    |
+
+### Notes
+
+The opsadmin user was added to the wheel group, which allows sudo access on RHEL-based systems.
+
+The readonlyuser account was intentionally left without sudo access. This confirms that limited users cannot perform administrator actions.
+
+This part demonstrates basic Linux identity and access management, including user creation, group membership and privilege testing.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-06-linux-users-and-groups-created.png](screenshots/screenshot-06-linux-users-and-groups-created.png)
+
+![screenshot-07-sudo-access-test.png](screenshots/screenshot-07-sudo-access-test.png)
