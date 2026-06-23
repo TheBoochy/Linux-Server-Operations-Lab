@@ -36,8 +36,9 @@ Public documentation will use the name Vulkan.
 
 Screenshots:
 
-* screenshot-01-initial-project-structure.png
-* screenshot-02-first-git-commit-and-push.png
+![screenshot-01-initial-project-structure.png](screenshots/screenshot-01-initial-project-structure.png)
+
+![screenshot-02-first-git-commit-and-push.png](screenshots/screenshot-02-first-git-commit-and-push.png)
 
 ---
 
@@ -112,5 +113,87 @@ The VM received an IP address through VMware NAT networking. This will be used l
 
 Screenshots:
 
-* screenshot-03a-linux-server-os-user-verification.png
-* screenshot-03b-linux-server-network-disk-memory-verification.png
+![screenshot-03a-linux-server-os-user-verification.png](screenshots/screenshot-03a-linux-server-os-user-verification.png)
+
+![screenshot-03b-linux-server-network-disk-memory-verification.png](screenshots/screenshot-03b-linux-server-network-disk-memory-verification.png)
+
+---
+
+## 2026-06-23 — Part 3: Network and SSH administration
+
+### Goal
+
+Configure and verify SSH administration for the Linux operations server.
+
+### Work completed
+
+* Verified the active Linux network interface.
+* Confirmed the server IP address.
+* Checked the SSH daemon service.
+* Verified that sshd is active and running.
+* Verified that SSH is listening on port 22.
+* Checked that firewalld is running.
+* Verified that the firewall allows SSH traffic.
+* Tested SSH login from Windows PowerShell.
+* Confirmed remote administration access to srv-linuxops01.
+
+### Verification results
+
+| Item                     | Result            |
+| ------------------------ | ----------------- |
+| SSH service              | active running    |
+| SSH daemon               | sshd              |
+| SSH port                 | 22                |
+| Firewall service         | firewalld         |
+| Firewall state           | running           |
+| Allowed firewall service | ssh               |
+| Network interface        | ens160            |
+| Server IP address        | 192.168.80.134/24 |
+| Remote login user        | vulkan            |
+| Remote login test        | Successful        |
+
+### Commands used
+
+```bash
+systemctl status sshd
+sudo firewall-cmd --state
+sudo firewall-cmd --list-all
+ip addr
+```
+
+```powershell
+ssh vulkan@192.168.80.134
+```
+
+```bash
+hostname
+whoami
+```
+
+### Command purpose
+
+| Command                      | Purpose                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| systemctl status sshd        | Checks whether the SSH server service is running.                         |
+| sudo firewall-cmd --state    | Checks whether firewalld is running.                                      |
+| sudo firewall-cmd --list-all | Shows active firewall zone settings and allowed services.                 |
+| ip addr                      | Shows network interfaces and IP addresses.                                |
+| ssh vulkan@192.168.80.134    | Starts a secure remote terminal session from Windows to the Linux server. |
+| hostname                     | Confirms the connected system hostname.                                   |
+| whoami                       | Confirms the logged-in Linux user.                                        |
+
+### Notes
+
+SSH is required for remote Linux administration. In a real server environment, administrators usually manage Linux systems remotely instead of using the local console.
+
+The firewall allows SSH, which means the server can accept remote administration connections while still keeping firewall protection active.
+
+Successful SSH login from Windows PowerShell confirms that the Linux server can be managed remotely.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-04-ssh-service-running.png](screenshots/screenshot-04-ssh-service-running.png)
+
+![screenshot-05-ssh-login-success.png](screenshots/screenshot-05-ssh-login-success.png)
