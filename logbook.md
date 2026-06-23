@@ -578,7 +578,7 @@ sudo tar -tzf "$LATEST_BACKUP" | head
 | head -n 1                                       | Selects the newest backup archive.                                     |
 | cut -d' ' -f2-                                  | Removes the timestamp prefix and keeps only the file path.             |
 | echo "$LATEST_BACKUP"                           | Shows the selected backup archive path.                                |
-| sudo tar -tzf "$LATEST_BACKUP" | head           | Lists the first files inside the backup archive without extracting it. |
+| sudo tar -tzf "$LATEST_BACKUP" \| head         | Lists the first files inside the backup archive without extracting it. |
 
 ### Notes
 
@@ -685,7 +685,7 @@ sudo tail -n 10 /var/log/linuxops-backup.log
 | sudo systemctl daemon-reload                             | Reloads systemd so it detects the new service and timer files.  |
 | sudo systemctl enable --now linuxops-backup.timer        | Enables the timer at boot and starts it immediately.            |
 | sudo systemctl status linuxops-backup.timer --no-pager   | Shows whether the backup timer is active and waiting.           |
-| systemctl list-timers --all | grep linuxops              | Lists systemd timers and filters for the LinuxOps backup timer. |
+| systemctl list-timers --all \| grep linuxops | Lists systemd timers and filters for the LinuxOps backup timer. |
 | sudo cat /etc/systemd/system/linuxops-backup.service     | Displays the backup service file for documentation evidence.    |
 | sudo cat /etc/systemd/system/linuxops-backup.timer       | Displays the backup timer file for documentation evidence.      |
 | sudo systemctl start linuxops-backup.service             | Manually starts the backup service for testing.                 |
@@ -707,5 +707,250 @@ This part demonstrates automatic job scheduling, systemd timers, service-trigger
 
 Screenshots:
 
+![screenshot-14-systemd-backup-timer-configured.png](screenshots/screenshot-14-systemd-backup-timer-configured.png)
 
 ![screenshot-15-scheduled-backup-verification.png](screenshots/screenshot-15-scheduled-backup-verification.png)
+
+---
+
+## 2026-06-23 — Part 9: Log review and troubleshooting
+
+### Goal
+
+Review Linux system logs, service logs and system health information, then create a troubleshooting document with realistic Linux support cases.
+
+### Work completed
+
+* Reviewed failed systemd services.
+* Checked recent system log activity.
+* Reviewed SSH service logs.
+* Reviewed custom heartbeat service logs.
+* Reviewed backup service logs.
+* Checked recent login history.
+* Checked currently logged-in users.
+* Checked disk usage.
+* Checked memory and swap usage.
+* Created a troubleshooting document at docs/troubleshooting_cases.md.
+* Documented common Linux troubleshooting cases.
+* Added investigation commands, command purposes and possible fixes.
+* Added extra explanations for services, logs, firewalls, permissions, timers and backup issues.
+* Reviewed the troubleshooting document and corrected Markdown table formatting for commands that use pipes.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Failed services checked | Yes |
+| System logs reviewed | Yes |
+| SSH logs reviewed | Yes |
+| Heartbeat service logs reviewed | Yes |
+| Backup service logs reviewed | Yes |
+| Login history checked | Yes |
+| Current users checked | Yes |
+| Disk usage checked | Yes |
+| Memory usage checked | Yes |
+| Troubleshooting document created | Yes |
+| Troubleshooting cases documented | 8 cases |
+
+### Commands used
+
+```bash
+systemctl --failed
+journalctl -xe --no-pager | tail -n 20
+journalctl -u sshd --no-pager | tail -n 20
+journalctl -u linuxops-heartbeat.service --no-pager
+journalctl -u linuxops-backup.service --no-pager
+last | head
+who
+df -h
+free -h
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| systemctl --failed | Lists systemd units that are currently in a failed state. |
+| journalctl -xe --no-pager \| tail -n 20 | Shows recent system log entries with extra explanation where available. |
+| journalctl -u sshd --no-pager \| tail -n 20 | Shows recent SSH service log entries. |
+| journalctl -u linuxops-heartbeat.service --no-pager | Shows logs for the custom heartbeat service. |
+| journalctl -u linuxops-backup.service --no-pager | Shows logs for the backup service. |
+| last \| head | Shows recent login history. |
+| who | Shows users currently logged into the system. |
+| df -h | Shows disk usage in human-readable format. |
+| free -h | Shows memory and swap usage in human-readable format. |
+
+### Troubleshooting cases documented
+
+| Case | Topic |
+|---|---|
+| Case 1 | SSH service is not running |
+| Case 2 | Firewall blocks SSH |
+| Case 3 | Backup job failed |
+| Case 4 | User cannot use sudo |
+| Case 5 | Disk space is nearly full |
+| Case 6 | Custom heartbeat service failed |
+| Case 7 | Backup timer is not running |
+| Case 8 | Backup archive cannot be listed |
+
+### Notes
+
+This part demonstrates basic Linux troubleshooting and operational support skills.
+
+The log review commands were used to inspect systemd service state, system journal entries, SSH activity, custom service logs, backup service logs, login sessions, disk usage and memory usage.
+
+The troubleshooting document was created to explain common Linux server problems in a support-style format. Each case includes symptoms, investigation commands, command purpose and possible fixes.
+
+This part is useful for a sysadmin portfolio because it shows not only how services were configured, but also how problems can be investigated, explained and documented.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-16a-linux-log-review-services.png](screenshots/screenshot-16a-linux-log-review-services.png)
+
+![screenshot-17-linux-troubleshooting-cases.png](screenshots/screenshot-17-linux-troubleshooting-cases.png)
+
+---
+
+## 2026-06-23 — Part 10: Monitoring script
+
+### Goal
+
+Create and verify a Linux health-check script that displays basic server status information for operational monitoring.
+
+### Work completed
+
+* Created a Linux health-check script at /usr/local/bin/linuxops-health-check.sh.
+* Made the script executable.
+* Verified the script permissions.
+* Displayed the script content for documentation.
+* Ran the script manually.
+* Verified that the script reports hostname information.
+* Verified that the script reports current date and time.
+* Verified that the script reports uptime and load average.
+* Verified that the script reports logged-in users.
+* Verified that the script reports disk usage.
+* Verified that the script reports memory and swap usage.
+* Verified that the script reports failed systemd services.
+* Verified that the script reports backup timer status.
+* Verified that the script reports the latest backup archive.
+* Copied the script into the project folder under scripts/linuxops-health-check.sh.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Script path on server | /usr/local/bin/linuxops-health-check.sh |
+| Script path in project | scripts/linuxops-health-check.sh |
+| Script executable | Yes |
+| Hostname check | Working |
+| Date and time check | Working |
+| Uptime check | Working |
+| Logged-in users check | Working |
+| Disk usage check | Working |
+| Memory usage check | Working |
+| Failed services check | Working |
+| Backup timer status check | Working |
+| Latest backup archive check | Working |
+| Manual script test | Successful |
+
+### Commands used
+
+```bash
+sudo tee /usr/local/bin/linuxops-health-check.sh > /dev/null <<'EOF'
+#!/bin/bash
+
+echo "========================================"
+echo " LinuxOps Server Health Check"
+echo "========================================"
+echo
+
+echo "Hostname:"
+hostname
+echo
+
+echo "Date and time:"
+date
+echo
+
+echo "Uptime:"
+uptime
+echo
+
+echo "Logged-in users:"
+who
+echo
+
+echo "Disk usage:"
+df -h
+echo
+
+echo "Memory usage:"
+free -h
+echo
+
+echo "Failed systemd services:"
+systemctl --failed
+echo
+
+echo "Backup timer status:"
+systemctl is-enabled linuxops-backup.timer 2>/dev/null
+systemctl is-active linuxops-backup.timer 2>/dev/null
+echo
+
+echo "Latest backup archive:"
+sudo find /backups -name "*.tar.gz" -type f -printf "%T@ %p\n" 2>/dev/null | sort -nr | head -n 1 | cut -d' ' -f2-
+echo
+
+echo "Health check completed."
+EOF
+
+sudo chmod +x /usr/local/bin/linuxops-health-check.sh
+ls -l /usr/local/bin/linuxops-health-check.sh
+sudo cat /usr/local/bin/linuxops-health-check.sh
+sudo /usr/local/bin/linuxops-health-check.sh
+```
+
+### Command purpose
+
+| Command | Purpose |
+|---|---|
+| sudo tee /usr/local/bin/linuxops-health-check.sh | Creates the health-check script on the Linux server. |
+| sudo chmod +x /usr/local/bin/linuxops-health-check.sh | Makes the script executable. |
+| ls -l /usr/local/bin/linuxops-health-check.sh | Shows script permissions, owner and path. |
+| sudo cat /usr/local/bin/linuxops-health-check.sh | Displays the script content for documentation evidence. |
+| sudo /usr/local/bin/linuxops-health-check.sh | Runs the health-check script manually. |
+| hostname | Shows the server hostname. |
+| date | Shows the current system date and time. |
+| uptime | Shows how long the server has been running and the current load average. |
+| who | Shows currently logged-in users. |
+| df -h | Shows disk usage in human-readable format. |
+| free -h | Shows memory and swap usage in human-readable format. |
+| systemctl --failed | Lists failed systemd services. |
+| systemctl is-enabled linuxops-backup.timer | Shows whether the backup timer is enabled at boot. |
+| systemctl is-active linuxops-backup.timer | Shows whether the backup timer is currently active. |
+| sudo find /backups -name "*.tar.gz" | Finds backup archive files using administrator permissions. |
+| sort -nr | Sorts backup files so the newest timestamp appears first. |
+| head -n 1 | Selects the newest backup archive from the sorted list. |
+| cut -d' ' -f2- | Removes the timestamp field and keeps only the backup file path. |
+
+### Notes
+
+The health-check script provides a quick operational overview of the Linux server.
+
+It is useful for basic monitoring because it combines several common sysadmin checks into one command. Instead of manually running separate commands for uptime, disk, memory, failed services and backup state, the script prints them in one readable report.
+
+The script checks the backup timer and latest backup archive because backups are a critical part of server operations. The backup archive check uses sudo find because the /backups directory has restricted permissions.
+
+The first screenshot verifies that the script exists, has executable permissions and contains the expected Bash code. The second and third screenshots verify the script output, including the lower part of the report where the backup timer status, latest backup archive and completion message are shown.
+
+This part demonstrates basic Linux monitoring, Bash scripting and operational verification.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-18-health-check-script-created.png](screenshots/screenshot-18-health-check-script-created.png)
+
+![screenshot-19-health-check-script-output.png](screenshots/screenshot-19-health-check-script-output.png)
