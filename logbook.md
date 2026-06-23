@@ -482,3 +482,120 @@ Screenshots:
 ![screenshot-10-custom-systemd-service-created.png](screenshots/screenshot-10-custom-systemd-service-created.png)
 
 ![screenshot-11-systemd-service-status.png](screenshots/screenshot-11-systemd-service-status.png)
+
+---
+
+## 2026-06-23 — Part 7: Backup script
+
+### Goal
+
+Create and verify a Linux backup script that generates compressed backup archives and logs backup activity.
+
+### Work completed
+
+* Created the /backups directory.
+* Set restricted permissions on the /backups directory.
+* Created a backup script at /usr/local/bin/linuxops-backup.sh.
+* Configured the script to back up /etc and /home.
+* Configured the script to create timestamped .tar.gz archives.
+* Configured the script to write activity to /var/log/linuxops-backup.log.
+* Made the backup script executable.
+* Verified the backup script permissions and content.
+* Ran the backup script manually.
+* Verified that a compressed backup archive was created.
+* Verified that the backup log recorded a successful backup.
+* Tested the backup archive by listing its contents with tar.
+
+### Verification results
+
+| Item                         | Result                               |
+| ---------------------------- | ------------------------------------ |
+| Backup directory             | /backups                             |
+| Backup directory permissions | 750                                  |
+| Backup script path           | /usr/local/bin/linuxops-backup.sh    |
+| Backup script permission     | executable                           |
+| Backup script owner          | root                                 |
+| Backup targets               | /etc and /home                       |
+| Backup format                | .tar.gz                              |
+| Backup log file              | /var/log/linuxops-backup.log         |
+| Backup archive created       | Yes                                  |
+| Backup archive size          | 5.5 MB                               |
+| Backup test                  | Archive contents listed successfully |
+| Backup result                | Successful                           |
+
+### Commands used
+
+```bash
+sudo mkdir -p /backups
+sudo chmod 750 /backups
+ls -ld /backups
+sudo tee /usr/local/bin/linuxops-backup.sh > /dev/null <<'EOF'
+#!/bin/bash
+
+BACKUP_DIR="/backups"
+LOG_FILE="/var/log/linuxops-backup.log"
+TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+BACKUP_FILE="$BACKUP_DIR/linuxops-etc-home-backup-$TIMESTAMP.tar.gz"
+
+echo "$(date) Starting LinuxOps backup" >> "$LOG_FILE"
+
+tar -czf "$BACKUP_FILE" /etc /home 2>> "$LOG_FILE"
+
+if [ $? -eq 0 ]; then
+    echo "$(date) Backup completed successfully: $BACKUP_FILE" >> "$LOG_FILE"
+else
+    echo "$(date) Backup failed" >> "$LOG_FILE"
+    exit 1
+fi
+EOF
+sudo chmod +x /usr/local/bin/linuxops-backup.sh
+ls -l /usr/local/bin/linuxops-backup.sh
+sudo cat /usr/local/bin/linuxops-backup.sh
+sudo /usr/local/bin/linuxops-backup.sh
+sudo ls -lh /backups
+sudo cat /var/log/linuxops-backup.log
+LATEST_BACKUP=$(sudo find /backups -name "*.tar.gz" -type f -printf "%T@ %p\n" | sort -nr | head -n 1 | cut -d' ' -f2-)
+echo "$LATEST_BACKUP"
+sudo tar -tzf "$LATEST_BACKUP" | head
+```
+
+### Command purpose
+
+| Command                                         | Purpose                                                                |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| sudo mkdir -p /backups                          | Creates the backup directory if it does not already exist.             |
+| sudo chmod 750 /backups                         | Sets restricted permissions on the backup directory.                   |
+| ls -ld /backups                                 | Shows the backup directory permissions and ownership.                  |
+| sudo tee /usr/local/bin/linuxops-backup.sh      | Creates the backup script without using a text editor.                 |
+| sudo chmod +x /usr/local/bin/linuxops-backup.sh | Makes the backup script executable.                                    |
+| ls -l /usr/local/bin/linuxops-backup.sh         | Shows the backup script permissions, owner and path.                   |
+| sudo cat /usr/local/bin/linuxops-backup.sh      | Displays the backup script content for documentation evidence.         |
+| sudo /usr/local/bin/linuxops-backup.sh          | Runs the backup script manually.                                       |
+| sudo ls -lh /backups                            | Lists backup archive files in human-readable format.                   |
+| sudo cat /var/log/linuxops-backup.log           | Displays the backup log file.                                          |
+| sudo find /backups -name "*.tar.gz"             | Finds backup archive files using administrator permissions.            |
+| sort -nr                                        | Sorts backup files by newest timestamp first.                          |
+| head -n 1                                       | Selects the newest backup archive.                                     |
+| cut -d' ' -f2-                                  | Removes the timestamp prefix and keeps only the file path.             |
+| echo "$LATEST_BACKUP"                           | Shows the selected backup archive path.                                |
+| sudo tar -tzf "$LATEST_BACKUP" | head           | Lists the first files inside the backup archive without extracting it. |
+
+### Notes
+
+The backup script creates timestamped compressed archives in /backups and records backup activity in /var/log/linuxops-backup.log.
+
+The backup targets are /etc and /home because they represent important system configuration files and user home directories in a Linux environment.
+
+The first attempt to select the latest archive with a wildcard failed because the /backups directory has restricted permissions. The wildcard was expanded by the user shell before sudo could access the directory. This was corrected by using sudo find to locate the newest archive.
+
+The tar messages about removing leading slashes are normal. This makes the archive safer to restore because it avoids storing absolute paths in a way that could overwrite system files unexpectedly.
+
+This part demonstrates backup scripting, archive creation, backup logging and backup verification.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-12-backup-script-created.png](screenshots/screenshot-12-backup-script-created.png)
+
+![screenshot-13-backup-test-success.png](screenshots/screenshot-13-backup-test-success.png)
