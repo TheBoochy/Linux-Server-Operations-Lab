@@ -599,3 +599,113 @@ Screenshots:
 ![screenshot-12-backup-script-created.png](screenshots/screenshot-12-backup-script-created.png)
 
 ![screenshot-13-backup-test-success.png](screenshots/screenshot-13-backup-test-success.png)
+
+---
+
+## 2026-06-23 — Part 8: Scheduled backup job
+
+### Goal
+
+Create and verify an automatic scheduled backup job using a systemd timer.
+
+### Work completed
+
+* Created a systemd backup service at /etc/systemd/system/linuxops-backup.service.
+* Configured the service to run /usr/local/bin/linuxops-backup.sh.
+* Created a systemd backup timer at /etc/systemd/system/linuxops-backup.timer.
+* Configured the timer to run the backup service every day at 02:00.
+* Enabled and started the backup timer.
+* Verified that the timer is active and waiting.
+* Listed the active timer with systemctl list-timers.
+* Displayed the service and timer configuration for documentation.
+* Manually started the backup service through systemd.
+* Verified that the backup service completed successfully.
+* Verified that backup archives exist in /backups.
+* Verified that the backup log was updated after the service run.
+
+### Verification results
+
+| Item                   | Result                            |
+| ---------------------- | --------------------------------- |
+| Backup service         | linuxops-backup.service           |
+| Backup timer           | linuxops-backup.timer             |
+| Service type           | oneshot                           |
+| Backup script          | /usr/local/bin/linuxops-backup.sh |
+| Timer schedule         | Daily at 02:00                    |
+| Persistent timer       | Yes                               |
+| Timer state            | active waiting                    |
+| Timer enabled          | Yes                               |
+| Manual service test    | Successful                        |
+| Backup archive created | Yes                               |
+| Backup log updated     | Yes                               |
+
+### Commands used
+
+```bash
+sudo tee /etc/systemd/system/linuxops-backup.service > /dev/null <<'EOF'
+[Unit]
+Description=LinuxOps Backup Service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/linuxops-backup.sh
+EOF
+
+sudo tee /etc/systemd/system/linuxops-backup.timer > /dev/null <<'EOF'
+[Unit]
+Description=Run LinuxOps Backup Service every day
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=linuxops-backup.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now linuxops-backup.timer
+sudo systemctl status linuxops-backup.timer --no-pager
+systemctl list-timers --all | grep linuxops
+sudo cat /etc/systemd/system/linuxops-backup.service
+sudo cat /etc/systemd/system/linuxops-backup.timer
+sudo systemctl start linuxops-backup.service
+sudo systemctl status linuxops-backup.service --no-pager
+sudo ls -lh /backups
+sudo tail -n 10 /var/log/linuxops-backup.log
+```
+
+### Command purpose
+
+| Command                                                  | Purpose                                                         |
+| -------------------------------------------------------- | --------------------------------------------------------------- |
+| sudo tee /etc/systemd/system/linuxops-backup.service     | Creates the systemd service that runs the backup script.        |
+| sudo tee /etc/systemd/system/linuxops-backup.timer       | Creates the systemd timer that schedules the backup service.    |
+| sudo systemctl daemon-reload                             | Reloads systemd so it detects the new service and timer files.  |
+| sudo systemctl enable --now linuxops-backup.timer        | Enables the timer at boot and starts it immediately.            |
+| sudo systemctl status linuxops-backup.timer --no-pager   | Shows whether the backup timer is active and waiting.           |
+| systemctl list-timers --all | grep linuxops              | Lists systemd timers and filters for the LinuxOps backup timer. |
+| sudo cat /etc/systemd/system/linuxops-backup.service     | Displays the backup service file for documentation evidence.    |
+| sudo cat /etc/systemd/system/linuxops-backup.timer       | Displays the backup timer file for documentation evidence.      |
+| sudo systemctl start linuxops-backup.service             | Manually starts the backup service for testing.                 |
+| sudo systemctl status linuxops-backup.service --no-pager | Shows whether the backup service completed successfully.        |
+| sudo ls -lh /backups                                     | Lists backup archives in human-readable format.                 |
+| sudo tail -n 10 /var/log/linuxops-backup.log             | Shows the latest backup log entries.                            |
+
+### Notes
+
+A systemd timer was used instead of cron because this lab is based on a RHEL-style system and already includes systemd service management.
+
+The timer is configured to run every day at 02:00. The Persistent=true setting means that if the server is powered off at the scheduled time, systemd can run the missed job after the server starts again.
+
+The backup service was also tested manually with systemctl start to confirm that the scheduled job has a working service behind it.
+
+This part demonstrates automatic job scheduling, systemd timers, service-triggered backups and backup verification.
+
+### Evidence
+
+Screenshots:
+
+
+![screenshot-15-scheduled-backup-verification.png](screenshots/screenshot-15-scheduled-backup-verification.png)
