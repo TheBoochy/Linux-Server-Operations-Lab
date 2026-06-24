@@ -954,3 +954,80 @@ Screenshots:
 ![screenshot-18-health-check-script-created.png](screenshots/screenshot-18-health-check-script-created.png)
 
 ![screenshot-19-health-check-script-output.png](screenshots/screenshot-19-health-check-script-output.png)
+
+---
+
+## 2026-06-23 — Part 12: Security and operations reflection
+
+### Goal
+
+Create a reflection document that explains the security and operations value of the Linux Server Operations Lab.
+
+### Work completed
+
+* Created a reflection document at docs/security_operations_reflection.md.
+* Documented the importance of SSH remote administration.
+* Explained user and privilege management.
+* Explained the principle of least privilege.
+* Reviewed firewall and service exposure from an operations perspective.
+* Explained custom systemd service management.
+* Reflected on backup operations and why backups matter.
+* Explained scheduled jobs with systemd timers.
+* Documented log review and troubleshooting value.
+* Explained the purpose of the health-check monitoring script.
+* Documented project limitations.
+* Added possible future improvements.
+* Added screenshot evidence for the reflection document.
+
+### Verification results
+
+| Item | Result |
+|---|---|
+| Reflection document created | Yes |
+| Remote administration covered | Yes |
+| User privilege management covered | Yes |
+| Firewall exposure covered | Yes |
+| Systemd service management covered | Yes |
+| Backup operations covered | Yes |
+| Scheduled jobs covered | Yes |
+| Log review covered | Yes |
+| Monitoring covered | Yes |
+| Limitations documented | Yes |
+| Future improvements documented | Yes |
+
+### Document created
+
+```text
+docs/security_operations_reflection.md
+```
+
+### Main topics documented
+
+| Topic | Purpose |
+|---|---|
+| Remote administration | Explains why SSH is important for Linux server management. |
+| User and privilege management | Explains sudo access, groups and least privilege. |
+| Firewall and service exposure | Explains why exposed services should be reviewed. |
+| Systemd service management | Explains how custom Linux services are managed. |
+| Backup operations | Explains why backups and backup verification matter. |
+| Scheduled jobs | Explains why recurring maintenance should be automated. |
+| Log review and troubleshooting | Explains how logs help investigate problems. |
+| Monitoring | Explains the value of the health-check script. |
+| Limitations | Documents what was not production-ready in the lab. |
+| Future improvements | Lists realistic next steps for improving the lab. |
+
+### Notes
+
+This part adds a higher-level explanation of the Linux Server Operations Lab.
+
+The reflection document is useful because it shows that the lab is not only a collection of commands, but a complete operational workflow. It explains how the server was administered, protected, backed up, reviewed, monitored and documented.
+
+The limitations section is also important because it shows realistic awareness. The lab is not presented as a production system. It clearly states that NAT networking, local backup storage, missing restore testing, script-based monitoring and missing centralized logging would need improvement in a real environment.
+
+This part strengthens the portfolio value of the project by connecting technical tasks to real sysadmin and IT operations concepts.
+
+### Evidence
+
+Screenshots:
+
+![screenshot-20-security-operations-reflection.png](screenshots/screenshot-20-security-operations-reflection.png)
